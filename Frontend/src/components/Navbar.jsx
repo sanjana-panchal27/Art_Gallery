@@ -7,9 +7,9 @@ export default function Navbar() {
         <div className="brand">Art Gallery</div>
         <nav className="nav-links">
           <a href="#">Home</a>
-          <a href="#">Collections</a>
-          <a href="#">About</a>
-          <a href="#">Contact</a>
+          <a href="#collections">Collections</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
         </nav>
 
         <div className="nav-actions">

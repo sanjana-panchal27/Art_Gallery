@@ -7,6 +7,7 @@ const initialArtworks = [
     artist: "Sanjana P",
     price: "$420",
     img: "https://images.unsplash.com/photo-1504198458649-3128b932f49b?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ const initialArtworks = [
     artist: "L. Rivera",
     price: "$320",
     img: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
   {
     id: 3,
@@ -21,6 +23,7 @@ const initialArtworks = [
     artist: "A. Chen",
     price: "$290",
     img: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
   {
     id: 4,
@@ -28,6 +31,7 @@ const initialArtworks = [
     artist: "M. Diaz",
     price: "$360",
     img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
   {
     id: 5,
@@ -35,6 +39,7 @@ const initialArtworks = [
     artist: "K. Osei",
     price: "$480",
     img: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
   {
     id: 6,
@@ -42,6 +47,7 @@ const initialArtworks = [
     artist: "S. Patel",
     price: "$540",
     img: "https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?auto=format&fit=crop&w=800&q=60",
+    isPublished: true,
   },
 ];
 
@@ -70,12 +76,28 @@ export default function Grid() {
       artist,
       price: price.startsWith("$") ? price : `$${price}`,
       img: filePreview,
+      isPublished: false, // save new posts as drafts by default
     };
     setArtworks([newArt, ...artworks]);
     setTitle("");
     setArtist("");
     setPrice("");
     setFilePreview(null);
+  }
+
+  // admin mode: show draft manager when `?admin=1` is present in the URL
+  const adminMode =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("admin") === "1";
+
+  function publishArtwork(id) {
+    setArtworks((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, isPublished: true } : a))
+    );
+  }
+
+  function deleteArtwork(id) {
+    setArtworks((prev) => prev.filter((a) => a.id !== id));
   }
 
   return (
@@ -124,21 +146,62 @@ export default function Grid() {
       </section>
 
       <section className="art-grid">
-        {artworks.map((art) => (
-          <article key={art.id} className="card">
-            <img src={art.img} alt={art.title} />
-            <div className="card-body">
-              <div className="card-title">{art.title}</div>
-              <div className="card-sub">by {art.artist}</div>
-              <div style={{ flex: 1 }} />
-              <div className="card-footer">
-                <div className="price">{art.price}</div>
-                <button className="buy">Buy</button>
+        {artworks
+          .filter((a) => a.isPublished)
+          .map((art) => (
+            <article key={art.id} className="card">
+              <img src={art.img} alt={art.title} />
+              <div className="card-body">
+                <div className="card-title">{art.title}</div>
+                <div className="card-sub">by {art.artist}</div>
+                <div style={{ flex: 1 }} />
+                <div className="card-footer">
+                  <div className="price">{art.price}</div>
+                  <button className="buy">Buy</button>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
       </section>
+
+      {adminMode && (
+        <section className="drafts">
+          <h2>Drafts (admin)</h2>
+          {artworks.filter((a) => !a.isPublished).length === 0 && (
+            <p>No drafts</p>
+          )}
+          <div className="draft-list">
+            {artworks
+              .filter((a) => !a.isPublished)
+              .map((draft) => (
+                <article key={draft.id} className="card draft">
+                  <img src={draft.img} alt={draft.title} />
+                  <div className="card-body">
+                    <div className="card-title">{draft.title}</div>
+                    <div className="card-sub">by {draft.artist}</div>
+                    <div style={{ flex: 1 }} />
+                    <div className="card-footer">
+                      <div className="price">{draft.price}</div>
+                      <button
+                        className="buy"
+                        onClick={() => publishArtwork(draft.id)}
+                      >
+                        Publish
+                      </button>
+                      <button
+                        className="buy"
+                        onClick={() => deleteArtwork(draft.id)}
+                        style={{ marginLeft: 8, background: "#c33" }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }
